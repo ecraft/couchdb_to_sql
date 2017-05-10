@@ -8,12 +8,12 @@ or delete rows into a relational database from matching key-value conditions of 
 While CouchDB is awesome, business people probably won't be
 quite as impressed when they want to play around with the data. Regular SQL
 is generally accepted as being easy to use and much more widely supported by a larger
-range of comercial tools.
+range of commercial tools.
 
 Couch Tap will listen to incoming documents on a CouchDB's changes
-stream and automatically update rows of RDBMS tables defined in the
+stream and automatically update rows of RDBM's tables defined in the
 conversion schema. The changes stream uses a sequence number allowing
-synchronisation to be started and stopped at will.
+synchronization to be started and stopped at will.
 
 Ruby's fast and simple [sequel](http://sequel.jeremyevans.net/) library is used to provide the connection to the
 database. This library can also be used for migrations, important for frequently changing schemas.
@@ -65,7 +65,7 @@ changes "http://user:pass@host:port/invoicing" do
       # Collections perform special synchronization in order to deal with
       # one to one, or indeed many to many relationships.
       #
-      # Rather than attempting a complex syncrhonisation process, the current
+      # Rather than attempting a complex synchronization process, the current
       # version of Couch Tap will just DELETE all current entries with a
       # primary key id that matches that of the parent table.
       #
@@ -161,7 +161,7 @@ reliably found and removed from the relational database.
 
 ### Notes on deleted documents
 
-Synchronising a deleted document is generally a much more complicated operation.
+Synchronizing a deleted document is generally a much more complicated operation.
 Given that the original document no longer exists in the CouchDB database,
 there is no way to know which document group and table the document was inserted
 into.

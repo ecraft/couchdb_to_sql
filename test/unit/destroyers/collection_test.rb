@@ -2,9 +2,8 @@ require 'test_helper'
 
 module Destroyers
   class CollectionTest < Test::Unit::TestCase
-
     def setup
-      @parent = mock()
+      @parent = mock
     end
 
     def test_initialize_collection
@@ -21,12 +20,12 @@ module Destroyers
     end
 
     def test_defining_table
-      @table = mock()
+      @table = mock
       CouchTap::Destroyers::Table.expects(:new).with(@parent, :invoice_items, {}).returns(@table)
       @collection = CouchTap::Destroyers::Collection.new(@parent) do
         table :invoice_items
       end
-      tables = @collection.instance_eval("@_tables")
+      tables = @collection.instance_eval('@_tables')
       assert_equal tables.length, 1
       assert_equal tables.first, @table
     end
@@ -37,12 +36,12 @@ module Destroyers
         table :invoice_items
         table :invoice_entries
       end
-      tables = @collection.instance_eval("@_tables")
+      tables = @collection.instance_eval('@_tables')
       assert_equal tables.length, 2
     end
 
     def test_execution
-      @table = mock()
+      @table = mock
       CouchTap::Destroyers::Table.expects(:new).returns(@table)
       @collection = CouchTap::Destroyers::Collection.new(@parent) do
         table :invoice_items
@@ -50,6 +49,5 @@ module Destroyers
       @table.expects(:execute)
       @collection.execute
     end
-
   end
 end

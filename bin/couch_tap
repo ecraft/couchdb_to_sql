@@ -10,4 +10,3 @@ CouchTap.module_eval(File.open(ARGV[0]).read)
 
 # With the configuration loaded, start her up!
 CouchTap.start
-

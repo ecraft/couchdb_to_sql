@@ -2,7 +2,6 @@
 require 'test_helper'
 
 class ChangesTest < Test::Unit::TestCase
-
   def setup
     reset_test_db!
     build_sample_config
@@ -10,24 +9,24 @@ class ChangesTest < Test::Unit::TestCase
 
   def test_basic_init
     @database = @changes.database
-    assert @changes.database, "Did not assign a database"
+    assert @changes.database, 'Did not assign a database'
     assert @changes.database.is_a?(Sequel::Database)
     row = @database[:couch_sequence].first
-    assert row, "Did not create a couch_sequence table"
-    assert_equal row[:seq], 0, "Did not set a default sequence number"
-    assert_equal row[:name], TEST_DB_NAME, "Sequence name does not match"
+    assert row, 'Did not create a couch_sequence table'
+    assert_equal row[:seq], 0, 'Did not set a default sequence number'
+    assert_equal row[:name], TEST_DB_NAME, 'Sequence name does not match'
   end
 
   def test_defining_document_handler
     assert_equal @changes.handlers.length, 3
     handler = @changes.handlers.first
     assert handler.is_a?(CouchTap::DocumentHandler)
-    assert_equal handler.filter, :type => 'Foo'
+    assert_equal handler.filter, type: 'Foo'
   end
 
   def test_inserting_rows
-    row = {'seq' => 1, 'id' => '1234'}
-    doc = {'_id' => '1234', 'type' => 'Foo', 'name' => 'Some Document'}
+    row = { 'seq' => 1, 'id' => '1234' }
+    doc = { '_id' => '1234', 'type' => 'Foo', 'name' => 'Some Document' }
     @changes.expects(:fetch_document).with('1234').returns(doc)
 
     handler = @changes.handlers.first
@@ -41,8 +40,8 @@ class ChangesTest < Test::Unit::TestCase
   end
 
   def test_inserting_rows_with_mutiple_filters
-    row = {'seq' => 3, 'id' => '1234'}
-    doc = {'_id' => '1234', 'type' => 'Bar', 'special' => true, 'name' => 'Some Document'}
+    row = { 'seq' => 3, 'id' => '1234' }
+    doc = { '_id' => '1234', 'type' => 'Bar', 'special' => true, 'name' => 'Some Document' }
     @changes.expects(:fetch_document).with('1234').returns(doc)
 
     handler = @changes.handlers[0]
@@ -59,10 +58,10 @@ class ChangesTest < Test::Unit::TestCase
   end
 
   def test_deleting_rows
-    row = {'seq' => 9, 'id' => '1234', 'deleted' => true}
+    row = { 'seq' => 9, 'id' => '1234', 'deleted' => true }
 
     @changes.handlers.each do |handler|
-      handler.expects(:delete).with({'_id' => row['id']})
+      handler.expects(:delete).with('_id' => row['id'])
     end
 
     @changes.send(:process_row, row)
@@ -71,7 +70,7 @@ class ChangesTest < Test::Unit::TestCase
   end
 
   def test_returning_schema
-    schema = mock()
+    schema = mock
     CouchTap::Schema.expects(:new).once.with(@changes.database, :items).returns(schema)
     # Run twice to ensure cached
     assert_equal @changes.schema(:items), schema
@@ -82,14 +81,13 @@ class ChangesTest < Test::Unit::TestCase
 
   def build_sample_config
     @changes = CouchTap::Changes.new(TEST_DB_ROOT) do
-      database "sqlite:/"
-      document :type => 'Foo' do
+      database 'sqlite:/'
+      document type: 'Foo' do
       end
-      document :type => 'Bar' do
+      document type: 'Bar' do
       end
-      document :type => 'Bar', :special => true do
+      document type: 'Bar', special: true do
       end
     end
   end
-
 end

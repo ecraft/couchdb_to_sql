@@ -1,9 +1,7 @@
 module CouchTap
-
   # Wrapper around a sequel table definition
   # to allow easy access to column names.
   class Schema
-
     attr_accessor :name, :database, :columns, :column_names
 
     def initialize(database, name)
@@ -26,7 +24,5 @@ module CouchTap
         columns[row[0]] = row[1]
       end
     end
-
   end
-
 end

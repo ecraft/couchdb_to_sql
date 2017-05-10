@@ -1,0 +1,31 @@
+AllCops:
+  TargetRubyVersion: 2.3
+  DisplayCopNames: true
+
+Lint/EndAlignment:
+  EnforcedStyleAlignWith: variable
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
+Metrics/LineLength:
+  Max: 132
+Metrics/MethodLength:
+  Severity: warning
+
+# Rationale: allow Weirich-style blocks
+Style/BlockDelimiters:
+  Enabled: false
+Style/Documentation:
+  Enabled: false
+Style/Encoding:
+  Enabled: false
+Style/FileName:
+  Enabled: false
+Style/MultilineOperationIndentation:
+  EnforcedStyle: indented
+Style/NumericPredicate:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
+

@@ -17,7 +17,6 @@ require 'couch_tap/builders/table'
 require 'couch_tap/destroyers/collection'
 require 'couch_tap/destroyers/table'
 
-
 module CouchTap
   extend self
 
@@ -28,11 +27,9 @@ module CouchTap
   def start
     threads = []
     @changes.each do |changes|
-      threads << Thread.new(changes) do |c|
-        c.start
-      end
+      threads << Thread.new(changes, &:start)
     end
-    threads.each {|thr| thr.join}
+    threads.each(&:join)
   end
 
   # Provide some way to handle messages
@@ -45,6 +42,4 @@ module CouchTap
     log.level = Logger::INFO
     log
   end
-
 end
-

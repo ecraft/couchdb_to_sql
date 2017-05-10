@@ -1,7 +1,5 @@
 module CouchTap
-
   class DocumentHandler
-
     attr_reader :changes, :filter, :mode
     attr_accessor :id, :document
 
@@ -13,7 +11,7 @@ module CouchTap
     end
 
     def handles?(doc)
-      @filter.each do |k,v|
+      @filter.each do |k, v|
         return false if doc[k.to_s] != v
       end
       true
@@ -67,7 +65,5 @@ module CouchTap
     def database
       changes.database
     end
-
   end
-
 end

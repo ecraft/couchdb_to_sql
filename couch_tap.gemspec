@@ -12,11 +12,13 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
+  s.add_dependency "activesupport", "~> 5.0"
   s.add_dependency "couchrest", "~> 1.1.3"
   s.add_dependency "httpclient", "~> 2.6"
-  s.add_dependency "yajl-ruby", "~> 1.3"
+  s.add_dependency "rake", '~> 12.0'
   s.add_dependency "sequel", ">= 4.36.0"
-  s.add_dependency "activesupport", "~> 5.0"
+  s.add_dependency "test-unit", '3.2'
+  s.add_dependency "yajl-ruby", "~> 1.3"
 
   s.add_development_dependency "mocha"
   s.add_development_dependency "pg"

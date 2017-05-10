@@ -19,5 +19,6 @@ Gem::Specification.new do |s|
   s.add_dependency "activesupport", "~> 5.0"
 
   s.add_development_dependency "mocha"
+  s.add_development_dependency "pg"
   s.add_development_dependency "sqlite3"
 end

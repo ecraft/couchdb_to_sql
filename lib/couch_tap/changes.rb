@@ -72,7 +72,7 @@ module CouchTap
 
       # Make sure the request has the latest sequence
       query = {:since => seq, :feed => 'continuous', :heartbeat => COUCHDB_HEARTBEAT * 1000}
-      
+
       while true do
         # Perform the actual request for chunked content
         @http.get_content(url, query) do |chunk|
@@ -127,7 +127,13 @@ module CouchTap
     end
 
     def fetch_document(id)
-      source.get(id)
+      doc = source.get(id)
+      transform_document(doc)
+    end
+
+    def transform_document(doc)
+      return doc unless doc['data']
+      doc.merge(doc.delete('data'))
     end
 
     def find_document_handlers(document)
@@ -141,19 +147,26 @@ module CouchTap
     end
 
     def update_sequence(seq)
-      database[:couch_sequence].where(:name => source.name).update(:seq => seq)
+      data = {
+        name: source.name,
+        seq: seq,
+        updated_at: DateTime.now
+      }
+      database[:couch_sequence]
+        .insert_conflict(target: :name, update: data)
+        .insert(data.merge(created_at: data[:updated_at]))
       self.seq = seq
     end
 
     def create_sequence_table
       database.create_table :couch_sequence do
         String :name, :primary_key => true
-        Bignum :seq, :default => 0
+        String :seq, :default => 0
         DateTime :created_at
         DateTime :updated_at
       end
       # Add first row
-      database[:couch_sequence].insert(:name => source.name)
+      database[:couch_sequence].insert(name: source.name, created_at: DateTime.now)
     end
 
     def logger

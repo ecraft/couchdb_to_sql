@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/ecraft/couch_tap.svg?branch=master)](https://travis-ci.org/ecraft/couch_tap)
 
 # Couch Tap
 

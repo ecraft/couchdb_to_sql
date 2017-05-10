@@ -14,7 +14,7 @@ stream and automatically update rows of RDBMS tables defined in the
 conversion schema. The changes stream uses a sequence number allowing
 synchronisation to be started and stopped at will.
 
-Ruby's fast and simple (sequel)[http://sequel.jeremyevans.net/] library is used to provide the connection to the
+Ruby's fast and simple [sequel](http://sequel.jeremyevans.net/) library is used to provide the connection to the
 database. This library can also be used for migrations, important for frequently changing schemas.
 
 Couch tap takes a simple two-step approach converting documents to rows. When a change event is received

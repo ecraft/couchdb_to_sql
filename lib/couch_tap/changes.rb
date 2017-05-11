@@ -141,7 +141,7 @@ module CouchTap
     def find_or_create_sequence_number
       create_sequence_table unless database.table_exists?(:couch_sequence)
       row = database[:couch_sequence].where(name: source.name).first
-      self.seq = (row ? row[:seq] : 0)
+      self.seq = (row ? row[:seq] : '0')
     end
 
     def update_sequence(seq)
@@ -159,7 +159,7 @@ module CouchTap
     def create_sequence_table
       database.create_table :couch_sequence do
         String :name, primary_key: true
-        String :seq, default: 0
+        String :seq, default: '0'
         DateTime :created_at
         DateTime :updated_at
       end

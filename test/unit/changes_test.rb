@@ -1,4 +1,3 @@
-
 require 'test_helper'
 
 class ChangesTest < Test::Unit::TestCase
@@ -13,7 +12,7 @@ class ChangesTest < Test::Unit::TestCase
     assert @changes.database.is_a?(Sequel::Database)
     row = @database[:couch_sequence].first
     assert row, 'Did not create a couch_sequence table'
-    assert_equal row[:seq], 0, 'Did not set a default sequence number'
+    assert_equal row[:seq], '0', 'Did not set a default sequence number'
     assert_equal row[:name], TEST_DB_NAME, 'Sequence name does not match'
   end
 

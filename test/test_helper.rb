@@ -6,7 +6,7 @@ require 'test/unit'
 require 'mocha/setup'
 require 'couch_tap'
 
-TEST_DB_HOST = 'http://127.0.0.1:5984/'.freeze
+TEST_DB_HOST = ENV.fetch('COUCHDB_URL', 'http://127.0.0.1:5984/').freeze
 TEST_DB_NAME = 'couch_tap'.freeze
 TEST_DB_ROOT = File.join(TEST_DB_HOST, TEST_DB_NAME)
 TEST_DB = CouchRest.database(TEST_DB_ROOT)

@@ -1,14 +1,11 @@
 
 module CouchTap
-
   module Builders
-
     #
     # Deal with a table definition that will automatically insert
     # a new row into the table.
     #
     class Table
-
       attr_reader :attributes
       attr_reader :parent, :name, :data, :primary_keys
 
@@ -85,13 +82,8 @@ module CouchTap
         set_attribute(primary_keys.last, id) unless id.blank?
 
         # Now go through each collection entry
-        if @_collections.length > 0
-          @_collections.each do |collection|
-            collection.execute
-          end
-        end
+        @_collections.each(&:execute) unless @_collections.empty?
       end
-
 
       private
 
@@ -126,12 +118,10 @@ module CouchTap
       # Take the document and try to automatically set the fields from the columns
       def set_attributes_from_data
         return unless data.is_a?(Hash) || data.is_a?(CouchRest::Document)
-        data.each do |k,v|
+        data.each do |k, v|
           k = k.to_sym
           next if k == :_id || k == :_rev
-          if schema.column_names.include?(k)
-            set_attribute(k, v)
-          end
+          set_attribute(k, v) if schema.column_names.include?(k)
         end
       end
 
@@ -153,9 +143,6 @@ module CouchTap
         end
         attributes[name] = value
       end
-
     end
-
   end
 end
-

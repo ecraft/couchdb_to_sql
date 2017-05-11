@@ -6,11 +6,9 @@
 #     couch_tap feed.rb
 #
 
-
-changes "http://user:pass@host:port/invoicing" do
-
+changes 'http://user:pass@host:port/invoicing' do
   # Which database should we connect to?
-  database "sqlite:///database.sqlite3"
+  database 'sqlite:///database.sqlite3'
 
   filter 'type' => 'User' do
     table :users
@@ -19,9 +17,4 @@ changes "http://user:pass@host:port/invoicing" do
   filter 'type' => 'Journey' do
     table :journeys
   end
-
-
 end
-
-
-

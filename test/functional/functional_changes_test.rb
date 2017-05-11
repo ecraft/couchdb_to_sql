@@ -1,7 +1,6 @@
 require '../test_helper'
 
 class FunctionalChangesTest < Test::Unit::TestCase
-
   def setup
     # Create a new CouchDB
     @source = CouchRest.database('couch_tap')
@@ -13,9 +12,8 @@ class FunctionalChangesTest < Test::Unit::TestCase
   end
 
   def test_something
-    assert_equal "foo", "bar"
+    assert_equal 'foo', 'bar'
   end
-
 
   protected
 
@@ -29,9 +27,8 @@ class FunctionalChangesTest < Test::Unit::TestCase
   end
 
   def create_sample_documents
-    @source.save_doc {:name => "Item 1", :price => 1.23, :created_at => Time.now}
-    @source.save_doc {:name => "Item 2", :price => 2.23, :created_at => Time.now}
-    @source.save_doc {:name => "Item 3", :price => 3.23, :created_at => Time.now}
+    @source.save_doc(name: 'Item 1', price: 1.23, created_at: Time.now)
+    @source.save_doc(name: 'Item 2', price: 2.23, created_at: Time.now)
+    @source.save_doc(name: 'Item 3', price: 3.23, created_at: Time.now)
   end
-
 end

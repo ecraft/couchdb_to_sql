@@ -1,7 +1,6 @@
 
 module CouchTap
   class Changes
-
     COUCHDB_HEARTBEAT  = 30
     INACTIVITY_TIMEOUT = 70
     RECONNECT_TIMEOUT  = 15
@@ -12,8 +11,8 @@ module CouchTap
 
     # Start a new Changes instance by connecting to the provided
     # CouchDB to see if the database exists.
-    def initialize(opts = "", &block)
-      raise "Block required for changes!" unless block_given?
+    def initialize(opts = '', &block)
+      raise 'Block required for changes!' unless block_given?
 
       @schemas  = {}
       @handlers = []
@@ -71,9 +70,9 @@ module CouchTap
       end
 
       # Make sure the request has the latest sequence
-      query = {:since => seq, :feed => 'continuous', :heartbeat => COUCHDB_HEARTBEAT * 1000}
+      query = { since: seq, feed: 'continuous', heartbeat: COUCHDB_HEARTBEAT * 1000 }
 
-      while true do
+      loop do
         # Perform the actual request for chunked content
         @http.get_content(url, query) do |chunk|
           # logger.debug chunk.strip
@@ -82,7 +81,6 @@ module CouchTap
         logger.error "#{source.name}: connection ended, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."
         wait RECONNECT_TIMEOUT
       end
-
     rescue HTTPClient::TimeoutError, HTTPClient::BadResponseError => e
       logger.error "#{source.name}: connection failed: #{e.message}, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."
       wait RECONNECT_TIMEOUT
@@ -96,7 +94,7 @@ module CouchTap
     end
 
     def process_row(row)
-      id  = row['id']
+      id = row['id']
 
       # Sometimes CouchDB will send an update to keep the connection alive
       if id
@@ -107,7 +105,7 @@ module CouchTap
           if row['deleted']
             # Delete all the entries
             logger.info "#{source.name}: received DELETE seq. #{seq} id: #{id}"
-            handlers.each{ |handler| handler.delete('_id' => id) }
+            handlers.each { |handler| handler.delete('_id' => id) }
           else
             logger.info "#{source.name}: received CHANGE seq. #{seq} id: #{id}"
             doc = fetch_document(id)
@@ -137,13 +135,13 @@ module CouchTap
     end
 
     def find_document_handlers(document)
-      @handlers.reject{ |row| !row.handles?(document) }
+      @handlers.select { |row| row.handles?(document) }
     end
 
     def find_or_create_sequence_number
       create_sequence_table unless database.table_exists?(:couch_sequence)
-      row = database[:couch_sequence].where(:name => source.name).first
-      self.seq = (row ? row[:seq] : 0)
+      row = database[:couch_sequence].where(name: source.name).first
+      self.seq = (row ? row[:seq] : '0')
     end
 
     def update_sequence(seq)
@@ -160,8 +158,8 @@ module CouchTap
 
     def create_sequence_table
       database.create_table :couch_sequence do
-        String :name, :primary_key => true
-        String :seq, :default => 0
+        String :name, primary_key: true
+        String :seq, default: '0'
         DateTime :created_at
         DateTime :updated_at
       end
@@ -172,6 +170,5 @@ module CouchTap
     def logger
       CouchTap.logger
     end
-
   end
 end

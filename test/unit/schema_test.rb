@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class SchemaTest < Test::Unit::TestCase
-
   def test_init
     database = create_database
     @schema = CouchTap::Schema.new(database, 'items')
@@ -27,7 +26,7 @@ class SchemaTest < Test::Unit::TestCase
   def test_prepares_columns
     database = create_database
     @schema = CouchTap::Schema.new(database, 'items')
-    assert_equal @schema.columns.keys, [:id, :name]
+    assert_equal @schema.columns.keys, %i[id name]
     obj = database.schema(:items)
     assert_equal @schema.columns.values, [obj[0][1], obj[1][1]]
   end
@@ -35,7 +34,7 @@ class SchemaTest < Test::Unit::TestCase
   def test_prepares_column_names
     database = create_database
     @schema = CouchTap::Schema.new(database, 'items')
-    assert_equal @schema.column_names, [:id, :name]
+    assert_equal @schema.column_names, %i[id name]
   end
 
   protected
@@ -48,5 +47,4 @@ class SchemaTest < Test::Unit::TestCase
     end
     database
   end
-
 end

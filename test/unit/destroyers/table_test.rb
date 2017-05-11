@@ -3,14 +3,13 @@ require 'test_helper'
 
 module Destroyers
   class TableTest < Test::Unit::TestCase
-
     def setup
       @database = create_database
-      @changes = mock()
+      @changes = mock
       @changes.stubs(:database).returns(@database)
       @changes.stubs(:schema).returns(CouchTap::Schema.new(@database, :items))
       @handler = CouchTap::DocumentHandler.new(@changes)
-      @handler.document = {'_id' => '12345'}
+      @handler.document = { '_id' => '12345' }
     end
 
     def test_init
@@ -23,7 +22,7 @@ module Destroyers
     end
 
     def test_init_override_primary_key
-      @row = CouchTap::Destroyers::Table.new(@handler, 'items', :primary_key => 'foo_item_id')
+      @row = CouchTap::Destroyers::Table.new(@handler, 'items', primary_key: 'foo_item_id')
       assert_equal @row.primary_keys, [:foo_item_id]
     end
 
@@ -34,7 +33,7 @@ module Destroyers
 
     def test_key_filter
       @row = CouchTap::Destroyers::Table.new(@handler, :items)
-      assert_equal @row.key_filter, {:item_id => '12345'}
+      assert_equal @row.key_filter, item_id: '12345'
     end
 
     def test_defining_collections
@@ -43,7 +42,7 @@ module Destroyers
           # Nothing
         end
       end
-      assert_equal @row.instance_eval("@_collections.length"), 1
+      assert_equal @row.instance_eval('@_collections.length'), 1
     end
 
     def test_defining_multiple_collections
@@ -55,19 +54,19 @@ module Destroyers
           # Nothing
         end
       end
-      assert_equal @row.instance_eval("@_collections.length"), 2
+      assert_equal @row.instance_eval('@_collections.length'), 2
     end
 
     def test_execution_deletes_rows
-      @database[:items].insert(:name => "Test Item 1", :item_id => "12345")
-      assert_equal @database[:items].count, 1, "Did not create sample row correctly!"
+      @database[:items].insert(name: 'Test Item 1', item_id: '12345')
+      assert_equal @database[:items].count, 1, 'Did not create sample row correctly!'
       @row = CouchTap::Destroyers::Table.new(@handler, :items)
       @row.execute
       assert_equal 0, @database[:items].count
     end
 
     def test_execution_on_collections
-      @col = mock()
+      @col = mock
       CouchTap::Destroyers::Collection.expects(:new).twice.returns(@col)
       @row = CouchTap::Destroyers::Table.new @handler, :groups do
         collection :items do
@@ -97,7 +96,6 @@ module Destroyers
       assert_empty @row.data
     end
 
-
     protected
 
     def create_database
@@ -106,13 +104,13 @@ module Destroyers
         String :item_id
         String :name
         Time :created_at
-        index :item_id, :unique => true
+        index :item_id, unique: true
       end
       database.create_table :groups do
         String :group_id
         String :name
         Time :created_at
-        index :group_id, :unique => true
+        index :group_id, unique: true
       end
       database
     end

@@ -11,6 +11,5 @@ Rake::TestTask.new do |t|
   t.test_files = FileList.new('test/unit/**/*.rb')
 end
 
-# TODO: Reenable tests here: https://github.com/ecraft/couch_tap/issues/5
 desc 'Run Rubocop linting'
-task default: :rubocop
+task default: %i[rubocop test]

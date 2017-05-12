@@ -1,4 +1,3 @@
-
 module CouchTap
   class Changes
     COUCHDB_HEARTBEAT  = 30
@@ -23,12 +22,42 @@ module CouchTap
       logger.info "Connected to CouchDB: #{info['db_name']}"
 
       # Prepare the definitions
+      @dsl_mode = true
       instance_eval(&block)
+      @dsl_mode = false
     end
 
     #### DSL
 
-    # Dual-purpose method, accepts configuration of database
+    # Sets the `ember_pouch_mode` flag. In `ember-pouch` mode, all the data fields are expected to reside within a
+    # `data` node in the document. More information on `ember-pouch` can be found
+    # [here](https://github.com/nolanlawson/ember-pouch).
+    #
+    # @note Dual-purpose method, accepts configuration of database
+    # or returns a previous definition.
+    def ember_pouch_mode
+      if @dsl_mode
+        @ember_pouch_mode ||= true
+      else
+        @ember_pouch_mode
+      end
+    end
+
+    # Sets the `upsert_mode` flag. When running in upsert mode, Sequel's insert_conflict mode is being used. More information
+    # about that can be found
+    # [here](http://sequel.jeremyevans.net/rdoc/files/doc/postgresql_rdoc.html#label-INSERT+ON+CONFLICT+Support)
+    #
+    # @note Dual-purpose method, accepts configuration of database
+    # or returns a previous definition.
+    def upsert_mode
+      if @dsl_mode
+        @upsert_mode ||= true
+      else
+        @upsert_mode
+      end
+    end
+
+    # @note Dual-purpose method, accepts configuration of database
     # or returns a previous definition.
     def database(opts = nil)
       if opts
@@ -62,8 +91,9 @@ module CouchTap
     def perform_request
       logger.info "#{source.name}: listening to changes feed from seq: #{seq}"
 
-      url = File.join(source.root, '_changes')
+      url = File.join(source.root.to_s, '_changes')
       uri = URI.parse(url)
+
       # Authenticate?
       if uri.user.present? && uri.password.present?
         @http.set_auth(source.root, uri.user, uri.password)
@@ -96,7 +126,6 @@ module CouchTap
     def process_row(row)
       id = row['id']
 
-      # Sometimes CouchDB will send an update to keep the connection alive
       if id
         seq = row['seq']
 
@@ -107,9 +136,15 @@ module CouchTap
             logger.info "#{source.name}: received DELETE seq. #{seq} id: #{id}"
             handlers.each { |handler| handler.delete('_id' => id) }
           else
-            logger.info "#{source.name}: received CHANGE seq. #{seq} id: #{id}"
+            logger.debug "#{source.name}: received CHANGE seq. #{seq} id: #{id}"
             doc = fetch_document(id)
-            find_document_handlers(doc).each do |handler|
+
+            document_handlers = find_document_handlers(doc)
+            if document_handlers.empty?
+              logger.error "No document handlers found for document. Document data: #{doc.inspect}"
+            end
+
+            document_handlers.each do |handler|
               # Delete all previous entries of doc, then re-create
               handler.delete(doc)
               handler.insert(doc)
@@ -118,20 +153,28 @@ module CouchTap
 
           update_sequence(seq)
         end # transaction
-
       elsif row['last_seq']
+        # Sometimes CouchDB will send an update to keep the connection alive
         logger.info "#{source.name}: received last seq: #{row['last_seq']}"
       end
     end
 
     def fetch_document(id)
       doc = source.get(id)
-      transform_document(doc)
+
+      if ember_pouch_mode
+        ember_pouch_transform_document(doc)
+      else
+        doc
+      end
     end
 
-    def transform_document(doc)
-      return doc unless doc['data']
-      doc.merge(doc.delete('data'))
+    def ember_pouch_transform_document(doc)
+      if doc.key?('data')
+        doc.merge(doc.delete('data'))
+      else
+        doc
+      end
     end
 
     def find_document_handlers(document)
@@ -145,14 +188,21 @@ module CouchTap
     end
 
     def update_sequence(seq)
-      data = {
-        name: source.name,
-        seq: seq,
-        updated_at: DateTime.now
-      }
-      database[:couch_sequence]
-        .insert_conflict(target: :name, update: data)
-        .insert(data.merge(created_at: data[:updated_at]))
+      if upsert_mode
+        data = {
+          name: source.name,
+          seq: seq,
+          updated_at: DateTime.now
+        }
+        database[:couch_sequence]
+          .insert_conflict(target: :name, update: data)
+          .insert(data.merge(created_at: data[:updated_at]))
+      else
+        database[:couch_sequence]
+          .where(name: source.name)
+          .update(seq: seq)
+      end
+
       self.seq = seq
     end
 

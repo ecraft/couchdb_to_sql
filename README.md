@@ -18,7 +18,7 @@ synchronization to be started and stopped at will.
 Ruby's fast and simple [sequel](http://sequel.jeremyevans.net/) library is used to provide the connection to the
 database. This library can also be used for migrations, important for frequently changing schemas.
 
-Couch tap takes a simple two-step approach converting documents to rows. When a change event is received
+Couch Tap takes a simple two-step approach converting documents to rows. When a change event is received
 for a matching `document` definition, each associated row is completely deleted. If the change
 is anything other than a delete event, the rows will be re-created with the new data.
 This makes things much easier when trying to deal with multi-level documents (i.e. documents of documents)
@@ -35,6 +35,10 @@ The following example attempts to outline most of the key features of the DSL.
 ```ruby
 # The couchdb database from which to request the changes feed
 changes "http://user:pass@host:port/invoicing" do
+
+  # upsert_mode       # Optional flag which can be enabled to take advantage of Postgres 9.5's support for INSERT CONFLICT,
+  #                   # e.g. upserts.
+  # ember_pouch_mode  # Optional flag which can be enabled if ember-pouch is being used to populate the CouchDB database.
 
   # Which database should we connect to?
   database "postgres://user:pass@localhost:5432/invoicing"
@@ -178,7 +182,12 @@ too much of a problem.
 
 Run tests using rake, or individual tests as follows:
 
-    rake test TEST=test/unit/changes_test.rb
+```shell
+$ rake test TEST=test/unit/changes_test.rb
+```
 
+If you have disabled the "admin party" in CouchDB, you might have to manually specify the CouchDB URL. Like this:
 
-
+```shell
+$ COUCHDB_URL='http://admin:admin@127.0.0.1:5984/' bundle exec rake test
+```

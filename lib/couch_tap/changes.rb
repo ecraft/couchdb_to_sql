@@ -91,7 +91,7 @@ module CouchTap
     def perform_request
       logger.info "#{source.name}: listening to changes feed from seq: #{seq}"
 
-      url = File.join(source.root, '_changes')
+      url = File.join(source.root.to_s, '_changes')
       uri = URI.parse(url)
 
       # Authenticate?
@@ -170,7 +170,7 @@ module CouchTap
     end
 
     def ember_pouch_transform_document(doc)
-      if doc.has_key?('data')
+      if doc.key?('data')
         doc.merge(doc.delete('data'))
       else
         doc

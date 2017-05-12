@@ -35,7 +35,7 @@ class ChangesTest < Test::Unit::TestCase
     @changes.send(:process_row, row)
 
     # Should update seq
-    assert_equal @changes.database[:couch_sequence].first[:seq], 1
+    assert_equal @changes.database[:couch_sequence].first[:seq], '1'
   end
 
   def test_inserting_rows_with_mutiple_filters
@@ -53,7 +53,7 @@ class ChangesTest < Test::Unit::TestCase
     handler.expects(:insert)
 
     @changes.send(:process_row, row)
-    assert_equal @changes.database[:couch_sequence].first[:seq], 3
+    assert_equal @changes.database[:couch_sequence].first[:seq], '3'
   end
 
   def test_deleting_rows
@@ -65,7 +65,7 @@ class ChangesTest < Test::Unit::TestCase
 
     @changes.send(:process_row, row)
 
-    assert_equal @changes.database[:couch_sequence].first[:seq], 9
+    assert_equal @changes.database[:couch_sequence].first[:seq], '9'
   end
 
   def test_returning_schema

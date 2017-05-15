@@ -33,8 +33,7 @@ module CouchTap
     # `data` node in the document. More information on `ember-pouch` can be found
     # [here](https://github.com/nolanlawson/ember-pouch).
     #
-    # @note Dual-purpose method, accepts configuration of database
-    # or returns a previous definition.
+    # @note Dual-purpose method, accepts configuration of setting or returns a previous definition.
     def ember_pouch_mode
       if @dsl_mode
         @ember_pouch_mode ||= true
@@ -47,13 +46,24 @@ module CouchTap
     # about that can be found
     # [here](http://sequel.jeremyevans.net/rdoc/files/doc/postgresql_rdoc.html#label-INSERT+ON+CONFLICT+Support)
     #
-    # @note Dual-purpose method, accepts configuration of database
-    # or returns a previous definition.
+    # @note Dual-purpose method, accepts configuration of setting or returns a previous definition.
     def upsert_mode
       if @dsl_mode
         @upsert_mode ||= true
       else
         @upsert_mode
+      end
+    end
+
+    # Sets the "fail on unhandled document" flag, which will turn log errors into runtime exceptions if an unhandled document is
+    # encountered.
+    #
+    # @note Dual-purpose method, accepts configuration of setting or returns a previous definition.
+    def fail_on_unhandled_document
+      if @dsl_mode
+        @fail_on_unhandled_document ||= true
+      else
+        @fail_on_unhandled_document
       end
     end
 
@@ -141,7 +151,10 @@ module CouchTap
 
             document_handlers = find_document_handlers(doc)
             if document_handlers.empty?
-              logger.error "No document handlers found for document. Document data: #{doc.inspect}"
+              message = "No document handlers found for document. Document data: #{doc.inspect}"
+              raise InvalidDataError, message if fail_on_unhandled_document
+
+              logger.error message
             end
 
             document_handlers.each do |handler|

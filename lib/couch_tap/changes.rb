@@ -152,14 +152,9 @@ module CouchTap
             document_handlers = find_document_handlers(doc)
             if document_handlers.empty?
               message = "No document handlers found for document. Document data: #{doc.inspect}"
+              raise InvalidDataError, message if fail_on_unhandled_document
 
-              puts fail_on_unhandled_document
-
-              if fail_on_unhandled_document
-                raise InvalidDataError.new(message)
-              else
-                logger.error message
-              end
+              logger.error message
             end
 
             document_handlers.each do |handler|

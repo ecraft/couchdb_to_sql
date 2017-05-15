@@ -18,6 +18,9 @@ require 'couch_tap/destroyers/collection'
 require 'couch_tap/destroyers/table'
 
 module CouchTap
+  Error = Class.new(StandardError)
+  InvalidDataError = Class.new(Error)
+
   extend self
 
   def changes(database, &block)

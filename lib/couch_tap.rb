@@ -1,8 +1,7 @@
-
 # Low level requirements
 require 'sequel'
 require 'couchrest'
-require 'yajl'
+require 'json'
 require 'httpclient'
 require 'logger'
 require 'active_support/inflector'

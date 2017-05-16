@@ -87,12 +87,10 @@ module CouchTap
       @schemas[name.to_sym] ||= Schema.new(database, name)
     end
 
-    # Start listening to the CouchDB changes feed. Must be called from
-    # a EventMachine run block for the HttpRequest to take control.
-    # By this stage we should have a sequence id so we know where to start from
-    # and all the filters should have been prepared.
+    # Start listening to the CouchDB changes feed. By this stage we should have
+    # a sequence id so we know where to start from and all the filters should
+    # have been prepared.
     def start
-      prepare_parser
       perform_request
     end
 
@@ -115,8 +113,11 @@ module CouchTap
       loop do
         # Perform the actual request for chunked content
         @http.get_content(url, query) do |chunk|
-          # logger.debug chunk.strip
-          @parser << chunk
+          rows = chunk.split("\n")
+          rows.each { |row|
+            parsed_row = JSON.parse(row)
+            process_row(parsed_row)
+          }
         end
         logger.error "#{source.name}: connection ended, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."
         wait RECONNECT_TIMEOUT
@@ -125,12 +126,6 @@ module CouchTap
       logger.error "#{source.name}: connection failed: #{e.message}, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."
       wait RECONNECT_TIMEOUT
       retry
-    end
-
-    def prepare_parser
-      @parser = Yajl::Parser.new
-      @parser.on_parse_complete = method(:process_row)
-      @parser
     end
 
     def process_row(row)

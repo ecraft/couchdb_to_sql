@@ -6,8 +6,8 @@ Gem::Specification.new do |s|
   s.description   = "Couch Tap provides a DSL that allows complex CouchDB documents to be converted into rows in a RDBMS' " \
                     'table. The stream of events received from the CouchDB changes feed will trigger documents to be fed into a ' \
                     'matching filter block and saved in the database.'
-  s.authors       = ['Sam Lown']
-  s.email         = 'me@samlown.com'
+  s.authors       = ['Sam Lown', 'Andreas Finne', 'Per Lundberg']
+  s.homepage      = 'https://github.com/ecraft/couch_tap'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
@@ -20,7 +20,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'rake', '~> 12.0'
   s.add_dependency 'sequel', '>= 4.36.0'
   s.add_dependency 'test-unit', '~> 3.2'
-  s.add_dependency 'yajl-ruby', '~> 1.3'
 
   s.add_development_dependency 'mocha'
   s.add_development_dependency 'pg'

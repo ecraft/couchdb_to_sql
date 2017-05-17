@@ -11,5 +11,10 @@ Rake::TestTask.new do |t|
   t.test_files = FileList.new('test/unit/**/*.rb')
 end
 
-desc 'Run Rubocop linting'
-task default: %i[rubocop test]
+if defined?(JRUBY_VERSION)
+  desc 'Runs Rubocop linting'
+  task default: :rubocop
+else
+  desc 'Run Rubocop linting and the unit tests'
+  task default: %i[rubocop test]
+end

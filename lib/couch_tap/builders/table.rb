@@ -61,6 +61,7 @@ module CouchTap
       def column(*args)
         column = args.first
         field  = args.last
+
         if block_given?
           set_attribute(column, yield)
         elsif field.is_a?(Symbol)

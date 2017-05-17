@@ -18,6 +18,7 @@ module CouchTap
       @source   = CouchRest.database(opts)
       info      = @source.info
       @http     = HTTPClient.new
+      @http.debug_dev = STDOUT if ENV.key?('DEBUG')
 
       logger.info "Connected to CouchDB: #{info['db_name']}"
 
@@ -108,7 +109,13 @@ module CouchTap
       end
 
       # Make sure the request has the latest sequence
-      query = { since: seq, feed: 'continuous', heartbeat: COUCHDB_HEARTBEAT * 1000 }
+      query = {
+        since: seq,
+        feed: 'continuous',
+        heartbeat: COUCHDB_HEARTBEAT * 1000
+      }
+
+      num_rows = 0
 
       loop do
         # Perform the actual request for chunked content
@@ -117,6 +124,9 @@ module CouchTap
           rows.each { |row|
             parsed_row = JSON.parse(row)
             process_row(parsed_row)
+
+            num_rows += 1
+            logger.info "Processed #{num_rows} rows" if (num_rows % 10_000) == 0
           }
         end
         logger.error "#{source.name}: connection ended, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."

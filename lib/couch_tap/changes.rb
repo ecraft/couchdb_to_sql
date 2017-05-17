@@ -16,11 +16,10 @@ module CouchTap
       @schemas  = {}
       @handlers = []
       @source   = CouchRest.database(opts)
-      info      = @source.info
       @http     = HTTPClient.new
       @http.debug_dev = STDOUT if ENV.key?('DEBUG')
 
-      logger.info "Connected to CouchDB: #{info['db_name']}"
+      log_info 'Connected to CouchDB'
 
       # Prepare the definitions
       @dsl_mode = true
@@ -98,7 +97,7 @@ module CouchTap
     protected
 
     def perform_request
-      logger.info "#{source.name}: listening to changes feed from seq: #{seq}"
+      log_info "listening to changes feed from seq: #{seq}"
 
       url = File.join(source.root.to_s, '_changes')
       uri = URI.parse(url)
@@ -126,14 +125,14 @@ module CouchTap
             process_row(parsed_row)
 
             num_rows += 1
-            logger.info "Processed #{num_rows} rows" if (num_rows % 10_000) == 0
+            log_info "Processed #{num_rows} rows" if (num_rows % 10_000) == 0
           }
         end
-        logger.error "#{source.name}: connection ended, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."
+        log_error "connection ended, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."
         wait RECONNECT_TIMEOUT
       end
     rescue HTTPClient::TimeoutError, HTTPClient::BadResponseError => e
-      logger.error "#{source.name}: connection failed: #{e.message}, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."
+      log_error "connection failed: #{e.message}, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."
       wait RECONNECT_TIMEOUT
       retry
     end
@@ -148,10 +147,10 @@ module CouchTap
         database.transaction do
           if row['deleted']
             # Delete all the entries
-            logger.info "#{source.name}: received DELETE seq. #{seq} id: #{id}"
+            log_info "received DELETE seq. #{seq} id: #{id}"
             handlers.each { |handler| handler.delete('_id' => id) }
           else
-            logger.debug "#{source.name}: received CHANGE seq. #{seq} id: #{id}"
+            log_debug "received CHANGE seq. #{seq} id: #{id}"
             doc = fetch_document(id)
 
             document_handlers = find_document_handlers(doc)
@@ -159,7 +158,7 @@ module CouchTap
               message = "No document handlers found for document. Document data: #{doc.inspect}"
               raise InvalidDataError, message if fail_on_unhandled_document
 
-              logger.error message
+              log_error message
             end
 
             document_handlers.each do |handler|
@@ -173,7 +172,7 @@ module CouchTap
         end # transaction
       elsif row['last_seq']
         # Sometimes CouchDB will send an update to keep the connection alive
-        logger.info "#{source.name}: received last seq: #{row['last_seq']}"
+        log_info "received last seq: #{row['last_seq']}"
       end
     end
 
@@ -237,6 +236,18 @@ module CouchTap
 
     def logger
       CouchTap.logger
+    end
+
+    def log_debug(message)
+      logger.debug "#{source.name}: #{message}"
+    end
+
+    def log_info(message)
+      logger.info "#{source.name}: #{message}"
+    end
+
+    def log_error(message)
+      logger.error "#{source.name}: #{message}"
     end
   end
 end

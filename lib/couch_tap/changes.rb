@@ -139,6 +139,7 @@ module CouchTap
 
     def process_row(row)
       id = row['id']
+      return if id =~ /^_design/
 
       if id
         seq = row['seq']

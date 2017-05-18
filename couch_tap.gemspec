@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'activesupport', '~> 5.0'
   s.add_dependency 'couchrest', '~> 2.0'
   s.add_dependency 'httpclient', '~> 2.6'
+  s.add_dependency 'logging_library', '~> 1.0', '>= 1.0.5'
   s.add_dependency 'rake', '~> 12.0'
   s.add_dependency 'sequel', '>= 4.36.0'
   s.add_dependency 'test-unit', '~> 3.2'

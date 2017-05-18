@@ -1,11 +1,11 @@
 # Low level requirements
-require 'sequel'
-require 'couchrest'
-require 'json'
-require 'httpclient'
-require 'logger'
-require 'active_support/inflector'
 require 'active_support/core_ext/object/blank'
+require 'active_support/inflector'
+require 'couchrest'
+require 'httpclient'
+require 'json'
+require 'logging_library'
+require 'sequel'
 
 # Our stuff
 require 'couch_tap/changes'
@@ -20,6 +20,8 @@ module CouchTap
   Error = Class.new(StandardError)
   InvalidDataError = Class.new(Error)
 
+  extend LoggingLibrary::Loggable
+
   extend self
 
   def changes(database, &block)
@@ -32,16 +34,5 @@ module CouchTap
       threads << Thread.new(changes, &:start)
     end
     threads.each(&:join)
-  end
-
-  # Provide some way to handle messages
-  def logger
-    @logger ||= prepare_logger
-  end
-
-  def prepare_logger
-    log = Logger.new(STDOUT)
-    log.level = Logger::INFO
-    log
   end
 end

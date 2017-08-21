@@ -83,7 +83,7 @@ module CouchTap
     end
 
     def skip_seqs(seqs)
-      @skip_seqs = @skip_seqs | Set.new(seqs)
+      @skip_seqs |= Set.new(seqs)
     end
 
     #### END DSL

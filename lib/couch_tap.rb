@@ -5,6 +5,7 @@ require 'couchrest'
 require 'httpclient'
 require 'json'
 require 'logging_library'
+require 'set'
 require 'sequel'
 
 # Our stuff

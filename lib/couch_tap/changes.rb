@@ -18,6 +18,7 @@ module CouchTap
       @source   = CouchRest.database(opts)
       @http     = HTTPClient.new
       @http.debug_dev = STDOUT if ENV.key?('DEBUG')
+      @skip_seqs = Set.new
 
       log_info 'Connected to CouchDB'
 
@@ -81,6 +82,12 @@ module CouchTap
       @handlers << DocumentHandler.new(self, filter, &block)
     end
 
+    def skip_seqs_file(file_path)
+      file_contents = File.read(file_path)
+      seqs = JSON.parse(file_contents)
+      @skip_seqs |= Set.new(seqs)
+    end
+
     #### END DSL
 
     def schema(name)
@@ -139,11 +146,12 @@ module CouchTap
 
     def process_row(row)
       id = row['id']
+      seq = row['seq']
+      
       return if id =~ /^_design/
+      return if @skip_seqs.include?(seq)
 
       if id
-        seq = row['seq']
-
         # Wrap the whole request in a transaction
         database.transaction do
           if row['deleted']
@@ -156,7 +164,8 @@ module CouchTap
 
             document_handlers = find_document_handlers(doc)
             if document_handlers.empty?
-              message = "No document handlers found for document. Document data: #{doc.inspect}"
+              message = 'No document handlers found for document. ' \
+                "Document data: #{doc.inspect}, seq: #{seq}, source: #{@source.name}"
               raise InvalidDataError, message if fail_on_unhandled_document
 
               log_error message

@@ -82,7 +82,9 @@ module CouchTap
       @handlers << DocumentHandler.new(self, filter, &block)
     end
 
-    def skip_seqs(seqs)
+    def skip_seqs_file(file_path)
+      file_contents = File.read(file_path)
+      seqs = JSON.parse(file_contents)
       @skip_seqs |= Set.new(seqs)
     end
 
@@ -162,7 +164,8 @@ module CouchTap
 
             document_handlers = find_document_handlers(doc)
             if document_handlers.empty?
-              message = "No document handlers found for document. Document data: #{doc.inspect}, seq: #{seq}"
+              message = 'No document handlers found for document. ' \
+                "Document data: #{doc.inspect}, seq: #{seq}, source: #{@source.name}"
               raise InvalidDataError, message if fail_on_unhandled_document
 
               log_error message

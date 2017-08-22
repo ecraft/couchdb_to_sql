@@ -46,6 +46,9 @@ changes "http://user:pass@host:port/invoicing" do
   # # encountered.
   # fail_on_unhandled_document
 
+  # # Optional path to a file containing a JSON array of sequences to skip.
+  # skip_seqs_file 'skiplist.json'
+
   # Which database should we connect to?
   database "postgres://user:pass@localhost:5432/invoicing"
 

@@ -147,7 +147,7 @@ module CouchTap
     def process_row(row)
       id = row['id']
       seq = row['seq']
-      
+
       return if id =~ /^_design/
       return if @skip_seqs.include?(seq)
 
@@ -198,6 +198,7 @@ module CouchTap
 
     def ember_pouch_transform_document(doc)
       if doc.key?('data')
+        doc['id'] = doc['_id'].split('_2_', 2).last
         doc.merge(doc.delete('data'))
       else
         doc

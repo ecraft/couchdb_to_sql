@@ -200,3 +200,12 @@ If you have disabled the "admin party" in CouchDB, you might have to manually sp
 ```shell
 $ COUCHDB_URL='http://admin:admin@127.0.0.1:5984/' bundle exec rake test
 ```
+
+## Releasing a new version
+
+- If you have never released a version of this gem before: `git remote add fury https://ecraft-gems@git.fury.io/ecraft-gems/couch_tap.git`
+- Merge all relevant pull requests
+- Bump the version in the `VERSION` file. Follow Semantic Versioning principles.
+- `git release <version>` (`brew install git-extras` if you are missing the `git release` command.)
+- `git push fury master`
+- `changelog-rs . <old> <new>` to regenerate the changelog which can then be copy-pasted to the [releases page](https://github.com/ecraft/couch_tap/releases). `cargo install changelog-rs` if you don't have it installed. More info on [its web page](https://github.com/perlun/changelog-rs).

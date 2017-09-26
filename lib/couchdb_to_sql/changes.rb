@@ -24,6 +24,10 @@ module CouchdbToSql
 
       log_info 'Connected to CouchDB'
 
+      @ember_pouch_mode = false
+      @fail_on_unhandled_document = false
+      @upsert_mode = false
+
       # Prepare the definitions
       @dsl_mode = true
       instance_eval(&block)
@@ -74,7 +78,15 @@ module CouchdbToSql
     # or returns a previous definition.
     def database(opts = nil)
       if opts
-        @database ||= Sequel.connect(opts)
+        @database ||= begin
+          Sequel.connect(opts).tap { |conn|
+            next unless ENV.key?('SEQUEL_LOG_LEVEL')
+
+            conn.logger = LoggingLibrary::LoggerFactory.create(self.class.name).tap { |l|
+              l.level = ENV['SEQUEL_LOG_LEVEL'].to_s.downcase.to_sym
+            }
+          }
+        end
         find_or_create_sequence_number
       end
       @database
@@ -103,6 +115,18 @@ module CouchdbToSql
       perform_request
     end
 
+    def log_debug(message)
+      logger.debug "#{source.name}: #{message}"
+    end
+
+    def log_info(message)
+      logger.info "#{source.name}: #{message}"
+    end
+
+    def log_error(message)
+      logger.error "#{source.name}: #{message}"
+    end
+
     protected
 
     def perform_request
@@ -119,9 +143,10 @@ module CouchdbToSql
 
       # Make sure the request has the latest sequence
       query = {
-        since: highest_sequence,
         feed: 'continuous',
-        heartbeat: COUCHDB_HEARTBEAT * 1000
+        heartbeat: COUCHDB_HEARTBEAT * 1000,
+        include_docs: true,
+        since: highest_sequence
       }
 
       num_rows = 0
@@ -157,13 +182,13 @@ module CouchdbToSql
       if id
         # Wrap the whole request in a transaction
         database.transaction do
+          doc = fetch_document_from(row)
+
           if row['deleted']
-            # Delete all the entries
             log_info "received DELETE seq. #{seq} id: #{id}"
-            handlers.each { |handler| handler.delete('_id' => id) }
+            handlers.each { |handler| handler.mark_as_deleted(doc) }
           else
             log_debug "received CHANGE seq. #{seq} id: #{id}"
-            doc = fetch_document(id)
 
             document_handlers = find_document_handlers(doc)
             if document_handlers.empty?
@@ -189,8 +214,8 @@ module CouchdbToSql
       end
     end
 
-    def fetch_document(id)
-      doc = source.get(id)
+    def fetch_document_from(row)
+      doc = row.fetch('doc')
 
       if ember_pouch_mode
         ember_pouch_transform_document(doc)
@@ -256,18 +281,6 @@ module CouchdbToSql
 
     def logger
       CouchdbToSql.logger
-    end
-
-    def log_debug(message)
-      logger.debug "#{source.name}: #{message}"
-    end
-
-    def log_info(message)
-      logger.info "#{source.name}: #{message}"
-    end
-
-    def log_error(message)
-      logger.error "#{source.name}: #{message}"
     end
   end
 end

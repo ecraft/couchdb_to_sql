@@ -4,7 +4,8 @@ require 'test_helper'
 
 class ChangesTest < Test::Unit::TestCase
   def setup
-    reset_test_db!
+    reset_test_couchdb!
+    reset_test_sql_db!(sql_connection_string)
     build_sample_config
   end
 
@@ -15,7 +16,7 @@ class ChangesTest < Test::Unit::TestCase
     row = @database[CouchdbToSql::COUCHDB_TO_SQL_SEQUENCES_TABLE].first
     assert row, "Did not create a #{CouchdbToSql::COUCHDB_TO_SQL_SEQUENCES_TABLE} table"
     assert_equal row.fetch(:highest_sequence), '0', 'Did not set a default sequence number'
-    assert_equal row.fetch(:couchdb_database_name), TEST_DB_NAME
+    assert_equal row.fetch(:couchdb_database_name), TEST_COUCHDB_NAME
   end
 
   def test_defining_document_handler
@@ -26,9 +27,16 @@ class ChangesTest < Test::Unit::TestCase
   end
 
   def test_inserting_rows
-    row = { 'seq' => 1, 'id' => '1234' }
-    doc = { '_id' => '1234', 'type' => 'Foo', 'name' => 'Some Document' }
-    @changes.expects(:fetch_document).with('1234').returns(doc)
+    doc = {
+      '_id' => '1234',
+      'type' => 'Foo',
+      'name' => 'Some Document'
+    }
+    row = {
+      'seq' => 1,
+      'id' => '1234',
+      'doc' => doc
+    }
 
     handler = @changes.handlers.first
     handler.expects(:delete).with(doc)
@@ -40,10 +48,16 @@ class ChangesTest < Test::Unit::TestCase
     assert_equal @changes.database[CouchdbToSql::COUCHDB_TO_SQL_SEQUENCES_TABLE].first[:highest_sequence], '1'
   end
 
-  def test_inserting_rows_with_mutiple_filters
-    row = { 'seq' => 3, 'id' => '1234' }
-    doc = { '_id' => '1234', 'type' => 'Bar', 'special' => true, 'name' => 'Some Document' }
-    @changes.expects(:fetch_document).with('1234').returns(doc)
+  def test_inserting_rows_with_multiple_filters
+    row = {
+      'seq' => 3,
+      'id' => '1234',
+      'doc' => {
+        'type' => 'Bar',
+        'special' => true,
+        'name' => 'Some Document'
+      }
+    }
 
     handler = @changes.handlers[0]
     handler.expects(:insert).never
@@ -61,10 +75,19 @@ class ChangesTest < Test::Unit::TestCase
   end
 
   def test_deleting_rows
-    row = { 'seq' => 9, 'id' => '1234', 'deleted' => true }
+    doc = {
+      'order_number' => '12345',
+      'customer_number' => '54321'
+    }
+    row = {
+      'seq' => 9,
+      'id' => '1234',
+      'deleted' => true,
+      'doc' => doc
+    }
 
     @changes.handlers.each do |handler|
-      handler.expects(:delete).with('_id' => row['id'])
+      handler.expects(:mark_as_deleted).with(doc)
     end
 
     @changes.send(:process_row, row)
@@ -75,6 +98,7 @@ class ChangesTest < Test::Unit::TestCase
   def test_returning_schema
     schema = mock
     CouchdbToSql::Schema.expects(:new).once.with(@changes.database, :items).returns(schema)
+
     # Run twice to ensure cached
     assert_equal @changes.schema(:items), schema
     assert_equal @changes.schema(:items), schema
@@ -83,14 +107,23 @@ class ChangesTest < Test::Unit::TestCase
   protected
 
   def build_sample_config
-    @changes = CouchdbToSql::Changes.new(TEST_DB_ROOT) do
-      database 'sqlite:/'
+    connection_string = sql_connection_string
+
+    @changes = CouchdbToSql::Changes.new(TEST_COUCHDB_URL) do
+      database connection_string
+
       document type: 'Foo' do
       end
+
       document type: 'Bar' do
       end
+
       document type: 'Bar', special: true do
       end
     end
+  end
+
+  def sql_connection_string
+    ENV.fetch('TEST_SQL_URL', 'sqlite:/')
   end
 end

@@ -67,37 +67,6 @@ changes "http://user:pass@host:port/invoicing" do
       column :total do
         doc['items'].inject(0){ |sum,item| sum + item['total'] }
       end
-
-      # Collections perform special synchronization in order to deal with one to one, or indeed many to many relationships.
-      #
-      # Rather than attempting a complex synchronization process, the current version of couchdb_to_sql will just DELETE all
-      # current entries with a primary key id that matches that of the parent table.
-      #
-      # The foreign id key is assumed to be name of the parent table in singular form with `_id` appended.
-      #
-      # Each item provided in the array will be made available in the `#data` method, and index from `#index`. `#document`
-      # continues to be the complete source document.
-      #
-      # Collections can be nested to create highly complex structures.
-      #
-      collection :groups do
-        table :invoice_groups do
-
-          collection :entries do
-            table :invoice_entries, :key => :entry_id do
-              column :date, data['date']
-              column :updated_at, document['updated_at']
-            end
-          end
-        end
-      end
-
-      # Collections can also be used on Many to Many relationships.
-      collection :label_ids do
-        table :invoice_labels do
-          column :label_id, data
-        end
-      end
     end
   end
 end
@@ -139,19 +108,27 @@ One of the limitations of `couchdb_to_sql` is that all tables must have an id fi
 
 #### column
 
-#### collection
-
 #### foreign_key
 
 
 ### Notes on deleted documents
 
-Synchronizing a deleted document is generally a much more complicated operation. Given that the original document no longer exists in the CouchDB database, there is no way to know which document group and table the document was inserted into.
+CouchDB documents being deleted are not deleted in the SQL database, because this is typically not what you want to do from a data integrity/etc. point of view. Instead, it is marked as deleted.
 
-To get around this issue, `couchdb_to_sql` will search through all the tables defined for the database and delete rows that match the primary or foreign keys.
+For this to work, the following two columns must exist in the table (example given is from PostgreSQL):
 
-Obviously, this is very inefficient. Fortunately, CouchDB is not really suited to systems that require lots of document deletion, so hopefully this won't be too much of a problem.
+```
+fieldops_reports=# \d spare_parts
+                       Table "public.spare_parts"
+       Column       |           Type           |       Modifiers
+--------------------+--------------------------+------------------------
+ spare_part_id      | text                     | not null
+ id                 | text                     |
+ _deleted           | boolean                  | not null default false
+ _deleted_timestamp | timestamp with time zone |
+```
 
+(`spare_part_id` is the primary key which will hold the CouchDB id. `id` holds the "Ember ID" in case you are using `ember-pouch` mode. `_deleted*` are the fields which indicate if the record is deleted, and if so, when it was marked as deleted.)
 
 ## Testing
 
@@ -166,6 +143,16 @@ If you have disabled the "admin party" in CouchDB, you might have to manually sp
 ```shell
 $ COUCHDB_URL='http://admin:admin@127.0.0.1:5984/' bundle exec rake test
 ```
+
+If you want to run tests towards a PostgreSQL database instead of CouchDB:
+
+```shell
+$ TEST_SQL_URL='postgres://localhost/couchdb_to_sql_test' bundle exec rake test
+```
+
+## Useful environment variables
+
+- `SEQUEL_LOG_LEVEL=debug` - set to enable logging of all SQL queries executed.
 
 ## Releasing a new version
 

@@ -14,10 +14,9 @@ require 'sequel'
 require 'couchdb_to_sql/changes'
 require 'couchdb_to_sql/schema'
 require 'couchdb_to_sql/document_handler'
-require 'couchdb_to_sql/builders/collection'
-require 'couchdb_to_sql/builders/table'
-require 'couchdb_to_sql/destroyers/collection'
-require 'couchdb_to_sql/destroyers/table'
+require 'couchdb_to_sql/table_builder'
+require 'couchdb_to_sql/table_deleted_marker'
+require 'couchdb_to_sql/table_destroyer'
 
 module CouchdbToSql
   extend LoggingLibrary::Loggable

@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 module CouchdbToSql
+  #
+  # Handles document insertion, deletion and 'marking as deleted' operations.
+  #
+  # This class delegates the actual insertion, deletion etc to the various `Table*` classes.
+  #
   class DocumentHandler
     attr_reader :changes, :filter, :mode
     attr_accessor :document
@@ -24,9 +29,11 @@ module CouchdbToSql
     # Handle a table definition.
     def table(name, opts = {}, &block)
       if @mode == :delete
-        Destroyers::Table.new(self, name, opts, &block).execute
+        TableDestroyer.new(self, name, opts).execute
+      elsif @mode == :mark_as_deleted
+        TableDeletedMarker.new(self, name, opts).execute
       elsif @mode == :insert
-        Builders::Table.new(self, name, opts, &block).execute
+        TableBuilder.new(self, name, opts, &block).execute
       end
     end
 
@@ -48,6 +55,10 @@ module CouchdbToSql
       document['_id']
     end
 
+    def rev
+      document['_rev']
+    end
+
     def insert(document)
       @mode = :insert
       self.document = document
@@ -56,6 +67,12 @@ module CouchdbToSql
 
     def delete(document)
       @mode = :delete
+      self.document = document
+      instance_eval(&@_block)
+    end
+
+    def mark_as_deleted(document)
+      @mode = :mark_as_deleted
       self.document = document
       instance_eval(&@_block)
     end

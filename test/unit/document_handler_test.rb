@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 require 'test_helper'
@@ -63,7 +62,7 @@ class DocumentHandlerTest < Test::Unit::TestCase
     @handler.instance_eval('@mode = :delete')
     @table = mock
     @table.expects(:execute)
-    CouchdbToSql::Destroyers::Table.expects(:new).with(@handler, :items, {}).returns(@table)
+    CouchdbToSql::TableDestroyer.expects(:new).with(@handler, :items, {}).returns(@table)
     @handler.table(:items)
   end
 
@@ -74,7 +73,7 @@ class DocumentHandlerTest < Test::Unit::TestCase
     @handler.instance_eval('@mode = :insert')
     @table = mock
     @table.expects(:execute)
-    CouchdbToSql::Builders::Table.expects(:new).with(@handler, :items, {}).returns(@table)
+    CouchdbToSql::TableBuilder.expects(:new).with(@handler, :items, {}).returns(@table)
     @handler.table(:items)
   end
 end

@@ -5,13 +5,13 @@
 Utility to listen to a CouchDB changes feed and automatically insert, update,
 or delete rows into an SQL database from matching key-value conditions of incoming documents.
 
-`couchdb_to_sql` is heavily indebted to [samlown's](https://github.com/samlown) original [couch_tap](https://github.com/samlown/couch_tap) gem, which is today unfortunately quite abandoned. We have added functionality needed for our particular use case, while still trying to keep it reasonably flexible and not too hardwired to the `ember-pouch` use case.
+`couchdb_to_sql` is heavily indebted to [samlown's](https://github.com/samlown) original [couch_tap](https://github.com/samlown/couch_tap) gem. We have added functionality needed for our particular use case, while still trying to keep it reasonably flexible and not too hardwired to the `ember-pouch` use case.
 
 While CouchDB is awesome, business people probably won't be quite as impressed when they want to play around with the data. Regular SQL is generally accepted as being easy to use and much more widely supported by a larger range of commercial tools.
 
-`couchdb_to_sql` will listen to incoming documents on a CouchDB's changes stream and automatically update rows of the SQL database tables defined in the conversion schema. The changes stream uses a sequence number allowing synchronization to be started and stopped at will.
+`couchdb_to_sql` will listen to incoming documents on a CouchDB server's [_changes feed](http://docs.couchdb.org/en/2.1.0/api/database/changes.html) in continuous mode, and automatically update rows of the SQL database tables defined in the conversion schema. The changes feed uses a sequence number allowing synchronization to be started and stopped at will.
 
-Ruby's fast and simple [sequel](http://sequel.jeremyevans.net/) library is used to provide the connection to the database. This library can also be used for migrations, which is important for frequently changing schemas.
+[Sequel](http://sequel.jeremyevans.net/) is used to provide the connection to the database. This library can also be used for migrations, which is important for frequently changing schemas.
 
 `couchdb_to_sql` takes a simple two-step approach converting documents to rows. When a change event is received for a matching `document` definition, each associated row is completely deleted. If the change is anything other than a delete event, the rows will be re-created with the new data. This makes things much easier when trying to deal with multi-level documents (i.e. documents of documents) and one-to-many table relationships.
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 module Builders
@@ -6,14 +8,14 @@ module Builders
       @database = create_database
       @changes = mock
       @changes.stubs(:database).returns(@database)
-      @changes.stubs(:schema).returns(CouchTap::Schema.new(@database, :items))
-      @handler = CouchTap::DocumentHandler.new(@changes)
+      @changes.stubs(:schema).returns(CouchdbToSql::Schema.new(@database, :items))
+      @handler = CouchdbToSql::DocumentHandler.new(@changes)
     end
 
     def test_init
       doc = CouchRest::Document.new('type' => 'Item', 'name' => 'Some Item', '_id' => '1234')
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new(@handler, 'items')
+      @row = CouchdbToSql::Builders::Table.new(@handler, 'items')
 
       assert_equal @row.parent, @handler
       assert_equal @row.handler, @handler
@@ -35,8 +37,8 @@ module Builders
       doc = CouchRest::Document.new('type' => 'Group', 'name' => 'Some Group', '_id' => '1234',
                                     'items' => [{ 'index' => 1, 'name' => 'Item 1' }])
       @handler.document = doc
-      @parent = CouchTap::Builders::Table.new(@handler, 'groups')
-      @row = CouchTap::Builders::Table.new(@parent, 'items', data: doc['items'][0])
+      @parent = CouchdbToSql::Builders::Table.new(@handler, 'groups')
+      @row = CouchdbToSql::Builders::Table.new(@parent, 'items', data: doc['items'][0])
 
       assert_equal @row.parent, @parent
       assert_equal @row.handler, @handler
@@ -50,7 +52,7 @@ module Builders
     def test_init_with_primary_key
       doc = { 'type' => 'Item', 'name' => 'Some Item', '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new(@handler, :items, primary_key: :entry_id)
+      @row = CouchdbToSql::Builders::Table.new(@handler, :items, primary_key: :entry_id)
 
       assert_equal @row.primary_keys, [:entry_id]
     end
@@ -60,8 +62,8 @@ module Builders
       doc = { 'type' => 'Item', 'name' => 'Some Group', '_id' => '1234',
               'item_ids' => %w[i1234 i1235] }
       @handler.document = doc
-      @parent = CouchTap::Builders::Table.new(@handler, 'groups')
-      @row = CouchTap::Builders::Table.new(@parent, :group_items, primary_key: false, data: doc['item_ids'][0]) do
+      @parent = CouchdbToSql::Builders::Table.new(@handler, 'groups')
+      @row = CouchdbToSql::Builders::Table.new(@parent, :group_items, primary_key: false, data: doc['item_ids'][0]) do
         column :item_id, data
       end
       @row.execute
@@ -71,7 +73,7 @@ module Builders
     def test_execute_with_new_row
       doc = { 'type' => 'Item', 'name' => 'Some Item', '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new(@handler, :items)
+      @row = CouchdbToSql::Builders::Table.new(@handler, :items)
       @row.execute
 
       items = @database[:items]
@@ -84,7 +86,7 @@ module Builders
       time = Time.now
       doc = { 'type' => 'Item', 'name' => 'Some Item', '_id' => '1234', 'created_at' => time.to_s }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new(@handler, :items)
+      @row = CouchdbToSql::Builders::Table.new(@handler, :items)
       @row.execute
       items = @database[:items]
       item = items.first
@@ -96,7 +98,7 @@ module Builders
       doc = { 'type' => 'Item', 'name' => 'Some Group', '_id' => '1234',
               'items' => [{ 'index' => 1, 'name' => 'Item 1' }] }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :group do
+      @row = CouchdbToSql::Builders::Table.new @handler, :group do
         collection :items do
           # Nothing
         end
@@ -112,7 +114,7 @@ module Builders
       doc = { 'type' => 'Item', 'name' => 'Some Group', '_id' => '1234',
               'items' => [{ 'index' => 1, 'name' => 'Item 1' }] }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :groups do
+      @row = CouchdbToSql::Builders::Table.new @handler, :groups do
         collection :items do
           # Nothing
         end
@@ -124,7 +126,7 @@ module Builders
     def test_column_assign_with_symbol
       doc = { 'type' => 'Item', 'full_name' => 'Some Other Item', '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :items do
+      @row = CouchdbToSql::Builders::Table.new @handler, :items do
         column :name, :full_name
       end
       @row.execute
@@ -136,7 +138,7 @@ module Builders
     def test_column_assign_with_value
       doc = { 'type' => 'Item', '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :items do
+      @row = CouchdbToSql::Builders::Table.new @handler, :items do
         column :name, 'Force the name'
       end
       @row.execute
@@ -148,7 +150,7 @@ module Builders
     def test_column_assign_with_nil
       doc = { 'type' => 'Item', 'name' => 'Some Item Name', '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :items do
+      @row = CouchdbToSql::Builders::Table.new @handler, :items do
         column :name, nil
       end
       @row.execute
@@ -159,7 +161,7 @@ module Builders
     def test_column_assign_with_empty_for_non_string
       doc = { 'type' => 'Item', 'name' => 'Some Item Name', 'created_at' => '', '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :items
+      @row = CouchdbToSql::Builders::Table.new @handler, :items
       @row.execute
       data = @database[:items].first
       assert_equal data[:created_at], nil
@@ -168,7 +170,7 @@ module Builders
     def test_column_assign_with_integer
       doc = { 'type' => 'Item', 'count' => 3, '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :items
+      @row = CouchdbToSql::Builders::Table.new @handler, :items
       @row.execute
       data = @database[:items].first
       assert_equal data[:count], 3
@@ -177,7 +179,7 @@ module Builders
     def test_column_assign_with_integer_as_string
       doc = { 'type' => 'Item', 'count' => '1', '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :items
+      @row = CouchdbToSql::Builders::Table.new @handler, :items
       @row.execute
       data = @database[:items].first
       assert_equal data[:count], 1
@@ -186,7 +188,7 @@ module Builders
     def test_column_assign_with_float
       doc = { 'type' => 'Item', 'price' => 1.2, '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :items
+      @row = CouchdbToSql::Builders::Table.new @handler, :items
       @row.execute
       data = @database[:items].first
       assert_equal data[:price], 1.2
@@ -195,7 +197,7 @@ module Builders
     def test_column_assign_with_float_as_string
       doc = { 'type' => 'Item', 'price' => '1.2', '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :items
+      @row = CouchdbToSql::Builders::Table.new @handler, :items
       @row.execute
       data = @database[:items].first
       assert_equal data[:price], 1.2
@@ -204,7 +206,7 @@ module Builders
     def test_column_assign_with_block
       doc = { 'type' => 'Item', '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :items do
+      @row = CouchdbToSql::Builders::Table.new @handler, :items do
         column :name do
           'Name from block'
         end
@@ -218,7 +220,7 @@ module Builders
     def test_column_assign_with_no_field
       doc = { 'type' => 'Item', 'name' => 'Some Other Item', '_id' => '1234' }
       @handler.document = doc
-      @row = CouchTap::Builders::Table.new @handler, :items do
+      @row = CouchdbToSql::Builders::Table.new @handler, :items do
         column :name
       end
       @row.execute

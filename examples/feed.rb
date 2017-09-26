@@ -1,9 +1,11 @@
 
+# frozen_string_literal: true
+
 # Sample Configuration Script
 #
 # Run using the command line application:
 #
-#     couch_tap feed.rb
+#     couchdb_to_sql feed.rb
 #
 
 changes 'http://user:pass@host:port/invoicing' do

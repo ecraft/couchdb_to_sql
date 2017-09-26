@@ -1,5 +1,7 @@
 
-module CouchTap
+# frozen_string_literal: true
+
+module CouchdbToSql
   module Destroyers
     #
     # The table destroyer will go through a table definition and make sure that

@@ -1,10 +1,12 @@
-module CouchTap
+# frozen_string_literal: true
+
+module CouchdbToSql
   class Changes
     COUCHDB_HEARTBEAT  = 30
     INACTIVITY_TIMEOUT = 70
     RECONNECT_TIMEOUT  = 15
 
-    attr_reader :source, :database, :schemas, :handlers
+    attr_reader :source, :schemas, :handlers
 
     attr_accessor :seq
 
@@ -246,7 +248,7 @@ module CouchTap
     end
 
     def logger
-      CouchTap.logger
+      CouchdbToSql.logger
     end
 
     def log_debug(message)

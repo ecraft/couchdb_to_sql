@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 require '../test_helper'
 
 class FunctionalChangesTest < Test::Unit::TestCase
   def setup
     # Create a new CouchDB
-    @source = CouchRest.database('couch_tap')
+    @source = CouchRest.database('couchdb_to_sql')
     create_sample_documents
 
     # Create a new Sqlite DB in memory

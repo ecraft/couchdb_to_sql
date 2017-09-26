@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 module Destroyers
@@ -7,7 +9,7 @@ module Destroyers
     end
 
     def test_initialize_collection
-      @collection = CouchTap::Destroyers::Collection.new(@parent) do
+      @collection = CouchdbToSql::Destroyers::Collection.new(@parent) do
         # nothing
       end
       assert_equal @collection.parent, @parent
@@ -15,14 +17,14 @@ module Destroyers
 
     def test_raise_error_if_no_block
       assert_raise ArgumentError do
-        @collection = CouchTap::Destroyers::Collection.new(@parent)
+        @collection = CouchdbToSql::Destroyers::Collection.new(@parent)
       end
     end
 
     def test_defining_table
       @table = mock
-      CouchTap::Destroyers::Table.expects(:new).with(@parent, :invoice_items, {}).returns(@table)
-      @collection = CouchTap::Destroyers::Collection.new(@parent) do
+      CouchdbToSql::Destroyers::Table.expects(:new).with(@parent, :invoice_items, {}).returns(@table)
+      @collection = CouchdbToSql::Destroyers::Collection.new(@parent) do
         table :invoice_items
       end
       tables = @collection.instance_eval('@_tables')
@@ -31,8 +33,8 @@ module Destroyers
     end
 
     def test_defining_tables
-      CouchTap::Destroyers::Table.expects(:new).twice
-      @collection = CouchTap::Destroyers::Collection.new(@parent) do
+      CouchdbToSql::Destroyers::Table.expects(:new).twice
+      @collection = CouchdbToSql::Destroyers::Collection.new(@parent) do
         table :invoice_items
         table :invoice_entries
       end
@@ -42,8 +44,8 @@ module Destroyers
 
     def test_execution
       @table = mock
-      CouchTap::Destroyers::Table.expects(:new).returns(@table)
-      @collection = CouchTap::Destroyers::Collection.new(@parent) do
+      CouchdbToSql::Destroyers::Table.expects(:new).returns(@table)
+      @collection = CouchdbToSql::Destroyers::Collection.new(@parent) do
         table :invoice_items
       end
       @table.expects(:execute)

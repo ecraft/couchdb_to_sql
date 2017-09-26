@@ -181,7 +181,7 @@ module CouchdbToSql
             end
           end
 
-          update_sequence_tabl(seq)
+          update_sequence_table(seq)
         end # transaction
       elsif row['last_seq']
         # Sometimes CouchDB will send an update to keep the connection alive
@@ -222,7 +222,7 @@ module CouchdbToSql
       self.highest_sequence = (row ? row.fetch(:highest_sequence) : '0')
     end
 
-    def update_sequence_tabl(new_highest_sequence)
+    def update_sequence_table(new_highest_sequence)
       if upsert_mode
         data = {
           couchdb_database_name: source.name,

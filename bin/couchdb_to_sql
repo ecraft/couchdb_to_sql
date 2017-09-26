@@ -4,7 +4,9 @@
 require 'rubygems'
 require 'couchdb_to_sql'
 
-unless ARGV[0]
+configuration_file_name = ARGV[0]
+
+unless configuration_file_name
   puts
   puts "Syntax: #{$PROGRAM_NAME} <configuration_file.rb>\n"
   puts 'For the exact syntax of the configuration file, please consult the documentation or the web site: ' \
@@ -13,9 +15,9 @@ unless ARGV[0]
 end
 
 # Take in the arguments for the configuration file and try to run it
-CouchdbToSql.logger.info "Reading configuration: #{ARGV[0]}"
+CouchdbToSql.logger.info "Reading configuration: #{configuration_file_name}"
 
-CouchdbToSql.module_eval(File.open(ARGV[0]).read)
+CouchdbToSql.module_eval(File.open(configuration_file_name).read, configuration_file_name)
 
 # With the configuration loaded, start her up!
 CouchdbToSql.start

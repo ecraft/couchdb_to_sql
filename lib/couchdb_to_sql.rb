@@ -20,10 +20,12 @@ require 'couchdb_to_sql/destroyers/collection'
 require 'couchdb_to_sql/destroyers/table'
 
 module CouchdbToSql
+  extend LoggingLibrary::Loggable
+
   Error = Class.new(StandardError)
   InvalidDataError = Class.new(Error)
 
-  extend LoggingLibrary::Loggable
+  COUCHDB_TO_SQL_SEQUENCES_TABLE = :_couchdb_to_sql_sequences
 
   module_function
 

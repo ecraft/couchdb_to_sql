@@ -1,5 +1,7 @@
 
-module CouchTap
+# frozen_string_literal: true
+
+module CouchdbToSql
   module Builders
     #
     # Deal with a table definition that will automatically insert
@@ -17,7 +19,7 @@ module CouchTap
         @name   = name.to_sym
 
         @primary_keys = parent.primary_keys.dup
-        unless opts[:primary_key] === false
+        unless opts[:primary_key] == false
           @primary_keys << (opts[:primary_key] || "#{@name.to_s.singularize}_id").to_sym
         end
 

@@ -1,4 +1,6 @@
-module CouchTap
+# frozen_string_literal: true
+
+module CouchdbToSql
   # Wrapper around a sequel table definition
   # to allow easy access to column names.
   class Schema

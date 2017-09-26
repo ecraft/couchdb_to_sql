@@ -1,4 +1,6 @@
-module CouchTap
+# frozen_string_literal: true
+
+module CouchdbToSql
   class Changes
     COUCHDB_HEARTBEAT  = 30
     INACTIVITY_TIMEOUT = 70
@@ -246,7 +248,7 @@ module CouchTap
     end
 
     def logger
-      CouchTap.logger
+      CouchdbToSql.logger
     end
 
     def log_debug(message)

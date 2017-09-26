@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 class SchemaTest < Test::Unit::TestCase
   def test_init
     database = create_database
-    @schema = CouchTap::Schema.new(database, 'items')
+    @schema = CouchdbToSql::Schema.new(database, 'items')
 
     assert_equal @schema.name, :items
     assert_equal @schema.database, database
@@ -12,20 +14,20 @@ class SchemaTest < Test::Unit::TestCase
   def test_init_when_table_does_not_exist
     database = Sequel.sqlite
     assert_raises Sequel::Error do
-      CouchTap::Schema.new(database, :items)
+      CouchdbToSql::Schema.new(database, :items)
     end
   end
 
   def test_dataset
     database = create_database
-    @schema = CouchTap::Schema.new(database, 'items')
+    @schema = CouchdbToSql::Schema.new(database, 'items')
     database.expects(:[]).with(:items)
     @schema.dataset
   end
 
   def test_prepares_columns
     database = create_database
-    @schema = CouchTap::Schema.new(database, 'items')
+    @schema = CouchdbToSql::Schema.new(database, 'items')
     assert_equal @schema.columns.keys, %i[id name]
     obj = database.schema(:items)
     assert_equal @schema.columns.values, [obj[0][1], obj[1][1]]
@@ -33,7 +35,7 @@ class SchemaTest < Test::Unit::TestCase
 
   def test_prepares_column_names
     database = create_database
-    @schema = CouchTap::Schema.new(database, 'items')
+    @schema = CouchdbToSql::Schema.new(database, 'items')
     assert_equal @schema.column_names, %i[id name]
   end
 

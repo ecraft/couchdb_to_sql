@@ -1,5 +1,7 @@
 
-module CouchTap
+# frozen_string_literal: true
+
+module CouchdbToSql
   module Builders
     #
     # Collection Builder. Go through each sub-table definition and recursively

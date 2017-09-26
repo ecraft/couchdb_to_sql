@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 class ChangesTest < Test::Unit::TestCase
@@ -19,7 +21,7 @@ class ChangesTest < Test::Unit::TestCase
   def test_defining_document_handler
     assert_equal @changes.handlers.length, 3
     handler = @changes.handlers.first
-    assert handler.is_a?(CouchTap::DocumentHandler)
+    assert handler.is_a?(CouchdbToSql::DocumentHandler)
     assert_equal handler.filter, type: 'Foo'
   end
 
@@ -70,7 +72,7 @@ class ChangesTest < Test::Unit::TestCase
 
   def test_returning_schema
     schema = mock
-    CouchTap::Schema.expects(:new).once.with(@changes.database, :items).returns(schema)
+    CouchdbToSql::Schema.expects(:new).once.with(@changes.database, :items).returns(schema)
     # Run twice to ensure cached
     assert_equal @changes.schema(:items), schema
     assert_equal @changes.schema(:items), schema
@@ -79,7 +81,7 @@ class ChangesTest < Test::Unit::TestCase
   protected
 
   def build_sample_config
-    @changes = CouchTap::Changes.new(TEST_DB_ROOT) do
+    @changes = CouchdbToSql::Changes.new(TEST_DB_ROOT) do
       database 'sqlite:/'
       document type: 'Foo' do
       end

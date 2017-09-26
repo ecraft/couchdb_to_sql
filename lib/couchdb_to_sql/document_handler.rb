@@ -1,4 +1,6 @@
-module CouchTap
+# frozen_string_literal: true
+
+module CouchdbToSql
   class DocumentHandler
     attr_reader :changes, :filter, :mode
     attr_accessor :id, :document

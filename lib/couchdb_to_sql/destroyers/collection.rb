@@ -1,5 +1,7 @@
 
-module CouchTap
+# frozen_string_literal: true
+
+module CouchdbToSql
   module Destroyers
     #
     # Collection Destroyer. Go through each sub-table definition and remove

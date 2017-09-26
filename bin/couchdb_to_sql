@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'rubygems'
+require 'couchdb_to_sql'
+
+unless ARGV[0]
+  puts
+  puts "Syntax: #{$PROGRAM_NAME} <configuration_file.rb>\n"
+  puts 'For the exact syntax of the configuration file, please consult the documentation or the web site: ' \
+       "https://github.com/ecraft/couchdb_to_sql\n\n"
+  exit 1
+end
+
+# Take in the arguments for the configuration file and try to run it
+CouchdbToSql.logger.info "Reading configuration: #{ARGV[0]}"
+
+CouchdbToSql.module_eval(File.open(ARGV[0]).read)
+
+# With the configuration loaded, start her up!
+CouchdbToSql.start

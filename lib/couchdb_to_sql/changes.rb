@@ -6,7 +6,7 @@ module CouchdbToSql
     INACTIVITY_TIMEOUT = 70
     RECONNECT_TIMEOUT  = 15
 
-    attr_reader :source, :database, :schemas, :handlers
+    attr_reader :source, :schemas, :handlers
 
     attr_accessor :seq
 

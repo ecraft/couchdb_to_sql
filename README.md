@@ -26,7 +26,7 @@ The following example attempts to outline most of the key features of the DSL.
 # The couchdb database from which to request the changes feed
 changes "http://user:pass@host:port/invoicing" do
   # # Optional flag which can be enabled to take advantage of Postgres 9.5's support for INSERT CONFLICT, e.g. upserts.
-  # # Note: this only deals with the couch_sequence metadata table, not the actual CouchDB documents themselves.
+  # # Note: this only deals with the _couchdb_to_sql_sequences metadata table, not the actual CouchDB documents themselves.
   # upsert_mode
 
   # # Optional flag which can be enabled if ember-pouch is being used to populate the CouchDB database. ember-pouch uses a

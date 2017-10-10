@@ -12,3 +12,5 @@ tmp
 crash.log
 pkg
 Gemfile.lock
+bin/
+coverage/

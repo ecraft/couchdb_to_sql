@@ -3,6 +3,13 @@ inherit_from: .rubocop_todo.yml
 AllCops:
   TargetRubyVersion: 2.3
   DisplayCopNames: true
+  Exclude:
+    - bin/**
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+Layout/MultilineOperationIndentation:
+  EnforcedStyle: indented
 
 Lint/EndAlignment:
   EnforcedStyleAlignWith: variable
@@ -12,6 +19,9 @@ Metrics/LineLength:
 Metrics/MethodLength:
   Severity: warning
 
+Naming/FileName:
+  Enabled: false
+
 # Rationale: allow Weirich-style blocks
 Style/BlockDelimiters:
   Enabled: false
@@ -19,9 +29,5 @@ Style/Documentation:
   Enabled: false
 Style/Encoding:
   Enabled: false
-Style/FileName:
-  Enabled: false
-Style/MultilineOperationIndentation:
-  EnforcedStyle: indented
 Style/NumericPredicate:
   Enabled: false

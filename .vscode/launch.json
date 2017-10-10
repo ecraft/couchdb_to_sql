@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "test-unit - run all tests",
+      "type": "Ruby",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/bin/rake",
+      "args": [
+        "test"
+      ],
+      "env": {
+        "TEST_SQL_URL": "postgres://localhost/couchdb_to_sql_test",
+        "COUCHDB_URL": "http://admin:admin@127.0.0.1:5984/"
+      }
+    },
+    {
+      "name": "test-unit - active spec file only",
+      "type": "Ruby",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/bin/rake",
+      "args": [
+        "test"
+      ],
+      "env": {
+        "TEST": "${file}",
+        "TEST_SQL_URL": "postgres://localhost/couchdb_to_sql_test",
+        "COUCHDB_URL": "http://admin:admin@127.0.0.1:5984/"
+      }
+    },
+    {
+      "name": "run with test_tap.rb",
+      "type": "Ruby",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/bin/bundler",
+      "args": [
+        "exec",
+        "${workspaceRoot}/exe/couchdb_to_sql",
+        "test_tap.rb"
+      ]
+    }
+  ]
+}

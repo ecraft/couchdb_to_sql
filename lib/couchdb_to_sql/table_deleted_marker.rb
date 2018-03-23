@@ -9,9 +9,8 @@ module CouchdbToSql
   class TableDeletedMarker < TableBuilder
     def execute
       dataset = handler.database[table_name]
-
-      if attributes.key?(:id)
-        handler.changes.log_info "Deletion with 'id' field present (#{primary_key} '#{handler.id}'), assuming tombstone. " \
+      unless doc['_plaque']
+        handler.changes.log_info "Deletion with additional info present (#{primary_key} '#{handler.id}'), assuming tombstone. " \
                                  'Updating data in SQL/Postgres database with data from CouchDB document.'
         fields = attributes.merge(
           _deleted: true,
@@ -26,8 +25,6 @@ module CouchdbToSql
           )
           .insert(fields)
       else
-        handler.changes.log_info "Found deletion without 'id' field (#{primary_key} '#{handler.id}'), assuming plaque. Leaving " \
-                                 'data as-is in SQL/Postgres, only setting _deleted* fields.'
         records_modified = dataset
           .where(key_filter)
           .update(
@@ -35,8 +32,8 @@ module CouchdbToSql
             _deleted_timestamp: Sequel::CURRENT_TIMESTAMP,
             rev: handler.rev
           )
-
-        handler.changes.log_info "#{records_modified} record(s) were marked as deleted"
+        return if records_modified == 0
+        handler.changes.log_info "#{table_name}: #{records_modified} record(s) were marked as deleted"
       end
     end
 

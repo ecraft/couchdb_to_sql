@@ -186,11 +186,10 @@ module CouchdbToSql
             log_info "received DELETE seq. #{seq} id: #{id}"
             document_handlers = find_document_handlers(doc)
             if document_handlers.empty?
-              log_info "Found deletion without type-identifying field, (id: '#{id}'), assuming plaque. Leaving " \
-                        'data as-is in SQL/Postgres, only setting _deleted* fields if found'
+              log_info "Found deletion without type-identifying field, (id: '#{id}'), removing " \
+                        'data from SQL/Postgres.'
               log_info 'Trying all handlers...'
-              doc['_plaque'] = true
-              handlers.each { |handler| handler.mark_as_deleted(doc) }
+              handlers.each { |handler| handler.delete(doc) }
             else
               document_handlers.each { |handler| handler.mark_as_deleted(doc) }
             end

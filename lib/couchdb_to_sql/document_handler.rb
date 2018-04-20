@@ -29,9 +29,9 @@ module CouchdbToSql
     # Handle a table definition.
     def table(name, opts = {}, &block)
       if @mode == :delete
-        TableDestroyer.new(self, name, opts).execute
+        TableDestroyer.new(self, name, opts, &block).execute
       elsif @mode == :mark_as_deleted
-        TableDeletedMarker.new(self, name, opts).execute
+        TableDeletedMarker.new(self, name, opts, &block).execute
       elsif @mode == :insert
         TableBuilder.new(self, name, opts, &block).execute
       end

@@ -74,6 +74,37 @@ class ChangesTest < Test::Unit::TestCase
     assert_equal @changes.database[CouchdbToSql::COUCHDB_TO_SQL_SEQUENCES_TABLE].first.fetch(:highest_sequence), '3'
   end
 
+  def test_mark_deleted_rows
+    doc = {
+      'order_number' => '12345',
+      'customer_number' => '54321',
+      'type' => 'Foo'
+    }
+    row = {
+      'seq' => 9,
+      'id' => '1234',
+      'deleted' => true,
+      'doc' => doc
+    }
+
+    handler = @changes.handlers[0]
+    handler.expects(:mark_as_deleted).with(doc)
+
+    handler = @changes.handlers[1]
+    handler.expects(:delete).never
+    handler.expects(:insert).never
+    handler.expects(:mark_as_deleted).with(doc).never
+
+    handler = @changes.handlers[2]
+    handler.expects(:delete).never
+    handler.expects(:insert).never
+    handler.expects(:mark_as_deleted).with(doc).never
+
+    @changes.send(:process_row, row)
+
+    assert_equal @changes.database[CouchdbToSql::COUCHDB_TO_SQL_SEQUENCES_TABLE].first.fetch(:highest_sequence), '9'
+  end
+
   def test_deleting_rows
     doc = {
       'order_number' => '12345',
@@ -87,7 +118,7 @@ class ChangesTest < Test::Unit::TestCase
     }
 
     @changes.handlers.each do |handler|
-      handler.expects(:mark_as_deleted).with(doc)
+      handler.expects(:delete).with(doc)
     end
 
     @changes.send(:process_row, row)

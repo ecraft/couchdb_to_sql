@@ -137,9 +137,7 @@ module CouchdbToSql
       uri = URI.parse(url)
 
       # Authenticate?
-      if uri.user.present? && uri.password.present?
-        @http.set_auth(source.root, uri.user, uri.password)
-      end
+      @http.set_auth(source.root, uri.user, uri.password) if uri.user.present? && uri.password.present?
 
       # Make sure the request has the latest sequence
       query = {
@@ -186,7 +184,15 @@ module CouchdbToSql
 
           if row['deleted']
             log_info "received DELETE seq. #{seq} id: #{id}"
-            handlers.each { |handler| handler.mark_as_deleted(doc) }
+            document_handlers = find_document_handlers(doc)
+            if document_handlers.empty?
+              log_info "Found deletion without type-identifying field, (id: '#{id}'), removing " \
+                        'data from SQL/Postgres.'
+              log_info 'Trying all handlers...'
+              handlers.each { |handler| handler.delete(doc) }
+            else
+              document_handlers.each { |handler| handler.mark_as_deleted(doc) }
+            end
           else
             log_debug "received CHANGE seq. #{seq} id: #{id}"
 
@@ -206,8 +212,8 @@ module CouchdbToSql
             end
           end
 
-          update_sequence_table(seq)
-        end # transaction
+          update_sequence_table(seq) # transaction
+        end
       elsif row['last_seq']
         # Sometimes CouchDB will send an update to keep the connection alive
         log_info "received last seq: #{row['last_seq']}"

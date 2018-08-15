@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ecraft/couch_tap.svg?branch=master)](https://travis-ci.org/ecraft/couch_tap)
+[![Build Status](https://travis-ci.org/ecraft/couch_tap.svg?branch=master)](https://travis-ci.org/ecraft/couch_tap) [![Gem Version](https://badge.fury.io/rb/couchdb_to_sql.svg)](https://badge.fury.io/rb/couchdb_to_sql)
 
 # couchdb_to_sql
 

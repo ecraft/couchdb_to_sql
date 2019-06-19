@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module CouchdbToSql
-  class Changes
+  class Changes # rubocop:disable ClassLength
     COUCHDB_HEARTBEAT  = 30
     INACTIVITY_TIMEOUT = 70
     RECONNECT_TIMEOUT  = 15
@@ -129,8 +129,9 @@ module CouchdbToSql
 
     protected
 
-    def perform_request
+    def perform_request # rubocop:disable AbcSize
       raise 'Internal error: Highest_sequence is expected to be non-nil' unless highest_sequence
+
       log_info "listening to changes feed from sequence number: #{highest_sequence}"
 
       url = File.join(source.root.to_s, '_changes')
@@ -148,25 +149,28 @@ module CouchdbToSql
       }
 
       num_rows = 0
-
       loop do
-        # Perform the actual request for chunked content
-        @http.get_content(url, query) do |chunk|
-          rows = chunk.split("\n")
-          rows.each { |row|
-            parsed_row = JSON.parse(row)
-            process_row(parsed_row)
+        begin
+          # Perform the actual request for chunked content
+          @http.get_content(url, query) do |chunk|
+            rows = chunk.split("\n")
+            rows.each { |row|
+              parsed_row = JSON.parse(row)
+              process_row(parsed_row)
 
-            num_rows += 1
-            log_info "Processed #{num_rows} rows" if (num_rows % 10_000) == 0
-          }
+              num_rows += 1
+              log_info "Processed #{num_rows} rows" if (num_rows % 10_000) == 0
+            }
+          end
+        rescue StandardError => e
+          log_error "exception occurred: #{e.message}"
+          log_error "connection ended, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."
+          sleep RECONNECT_TIMEOUT
         end
-        log_error "connection ended, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."
-        wait RECONNECT_TIMEOUT
       end
     rescue HTTPClient::TimeoutError, HTTPClient::BadResponseError => e
       log_error "connection failed: #{e.message}, attempting to reconnect in #{RECONNECT_TIMEOUT}s..."
-      wait RECONNECT_TIMEOUT
+      sleep RECONNECT_TIMEOUT
       retry
     end
 

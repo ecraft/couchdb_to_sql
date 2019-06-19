@@ -5,6 +5,7 @@ AllCops:
   DisplayCopNames: true
   Exclude:
     - bin/**
+    - examples/**
 
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented

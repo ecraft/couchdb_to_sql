@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module CouchdbToSql
-  class Changes
+  class Changes # rubocop:disable ClassLength
     COUCHDB_HEARTBEAT  = 30
     INACTIVITY_TIMEOUT = 70
     RECONNECT_TIMEOUT  = 15
@@ -131,6 +131,7 @@ module CouchdbToSql
 
     def perform_request # rubocop:disable AbcSize
       raise 'Internal error: Highest_sequence is expected to be non-nil' unless highest_sequence
+
       log_info "listening to changes feed from sequence number: #{highest_sequence}"
 
       url = File.join(source.root.to_s, '_changes')
